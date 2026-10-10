@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-// Renders the EBCORE film frame by frame in headless Chromium and encodes it
-// with ffmpeg, muxing the synthesized soundtrack.
+// Renders a film frame by frame in headless Chromium and encodes it with
+// ffmpeg, muxing the synthesized soundtrack. Duration comes from the film.
 //
-//   node tools/render.mjs                      # both formats -> ad/export/*.mp4
+//   node tools/render.mjs                      # ASSEL, both formats -> ad/export/assel-*.mp4
 //   node tools/render.mjs --format 9x16 --fps 30
-//   node tools/render.mjs --film 3d               # procedural 3D cut -> ad/export/ebcore-3d-*.mp4
+//   node tools/render.mjs --film ebcore        # EBCORE photo cut -> ad/export/ebcore-*.mp4
+//   node tools/render.mjs --film 3d            # EBCORE procedural 3D cut -> ad/export/ebcore-3d-*.mp4
 //   node tools/render.mjs --stills 0.5,2.4,5.6 --format 16x9 --out /tmp/stills
 import { chromium } from 'playwright-core';
 import http from 'node:http';
@@ -18,11 +19,9 @@ const args = Object.fromEntries(
   process.argv.slice(2).reduce((acc, a, i, all) => (a.startsWith('--') ? [...acc, [a.slice(2), all[i + 1]?.startsWith('--') ? true : all[i + 1] ?? true]] : acc), []),
 );
 const FPS = Number(args.fps || 30);
-const DURATION = 10;
 const formats = args.format && args.format !== true ? [args.format] : ['9x16', '16x9'];
 const outDir = path.resolve(args.out && args.out !== true ? args.out : path.join(ROOT, 'export'));
-const FILM = args.film === '3d' ? '3d' : 'photo';
-const SUFFIX = FILM === '3d' ? '-3d' : '';
+const FILM = typeof args.film === 'string' ? args.film : 'assel';
 const CHROME = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell';
 
 const MIME = { '.jpg': 'image/jpeg', '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf', '.mp4': 'video/mp4', '.png': 'image/png' };
@@ -64,7 +63,7 @@ async function main() {
       for (const format of formats) {
         const page = await openFilm(browser, port, format);
         for (const t of times) {
-          const file = path.join(outDir, `still${SUFFIX}-${format}-${t.toFixed(2)}.png`);
+          const file = path.join(outDir, `still-${FILM}-${format}-${t.toFixed(2)}.png`);
           fs.writeFileSync(file, dataUrlToBuffer(await page.evaluate((tt) => window.EB.frame(tt), t)));
           console.log('wrote', file);
         }
@@ -76,12 +75,13 @@ async function main() {
     let wavPath = null;
     for (const format of formats) {
       const page = await openFilm(browser, port, format);
+      const { duration: DURATION, name } = await page.evaluate(() => ({ duration: window.EB.duration, name: window.EB.name }));
       if (!wavPath) {
-        wavPath = path.join(outDir, `ebcore${SUFFIX}-soundtrack.wav`);
+        wavPath = path.join(outDir, `${name}-soundtrack.wav`);
         fs.writeFileSync(wavPath, Buffer.from(await page.evaluate(() => window.EB.soundtrackWav()), 'base64'));
         console.log('wrote', wavPath);
       }
-      const mp4 = path.join(outDir, `ebcore${SUFFIX}-${format}.mp4`);
+      const mp4 = path.join(outDir, `${name}-${format}.mp4`);
       const ff = spawn('ffmpeg', [
         '-y', '-loglevel', 'error',
         '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-',

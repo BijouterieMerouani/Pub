@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EBCORE — Publicité 10 s</title>
+  <title>Publicité chocolat</title>
   <style>
     @font-face { font-family: Cinzel; src: url(fonts/Cinzel.ttf); font-weight: 400 900; }
     :root { --gold: #d9a952; --ink: #0a0604; }
@@ -47,7 +47,7 @@
 <body>
   <div id="stage">
     <div id="cover">
-      <h1>EBCORE</h1>
+      <h1 id="brand"></h1>
       <button id="start" disabled>▶ Lancer la publicité</button>
       <div id="status"></div>
     </div>
@@ -57,8 +57,8 @@
     <button id="replay">↻ Rejouer</button>
     <button data-format="9x16">9:16</button>
     <button data-format="16x9">16:9</button>
-    <a data-mp4 hidden href="export/ebcore-9x16.mp4" download>MP4 9:16</a>
-    <a data-mp4 hidden href="export/ebcore-16x9.mp4" download>MP4 16:9</a>
+    <a data-mp4="9x16" hidden download>MP4 9:16</a>
+    <a data-mp4="16x9" hidden download>MP4 16:9</a>
   </div>
   <script type="module" src="src/main.js"></script>
 </body>

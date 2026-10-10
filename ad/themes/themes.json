@@ -1,0 +1,74 @@
+{
+  "brand": "ASSEL",
+  "slogan": "L’Algérie, dans chaque bouchée.",
+  "themes": [
+    {
+      "id": "mer",
+      "chocolate": "star",
+      "image": "mer.jpg",
+      "title": "MER",
+      "subtitle": "Fleur de sel de la Méditerranée",
+      "focus": [
+        0.4,
+        0.62
+      ],
+      "light": "#9fd8ff",
+      "rays": [
+        0.3,
+        0.24
+      ],
+      "particles": "spray"
+    },
+    {
+      "id": "foret",
+      "chocolate": "white",
+      "image": "foret.jpg",
+      "title": "FORÊT",
+      "subtitle": "Miel de chêne de Kabylie",
+      "focus": [
+        0.5,
+        0.6
+      ],
+      "light": "#e6ef9a",
+      "rays": [
+        0.52,
+        0.22
+      ],
+      "particles": "pollen"
+    },
+    {
+      "id": "montagne",
+      "chocolate": "round",
+      "image": "montagne.jpg",
+      "title": "MONTAGNE",
+      "subtitle": "Amandes des Aurès",
+      "focus": [
+        0.48,
+        0.5
+      ],
+      "light": "#e4edff",
+      "rays": [
+        0.5,
+        0.25
+      ],
+      "particles": "snow"
+    },
+    {
+      "id": "desert",
+      "chocolate": "date",
+      "image": "desert.jpg",
+      "title": "DÉSERT",
+      "subtitle": "Dattes de Biskra",
+      "focus": [
+        0.4,
+        0.36
+      ],
+      "light": "#ffa24a",
+      "rays": [
+        0.26,
+        0.28
+      ],
+      "particles": "sand"
+    }
+  ]
+}

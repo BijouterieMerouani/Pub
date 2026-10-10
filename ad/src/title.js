@@ -36,7 +36,7 @@ export function drawTitle(ctx, W, H, t, layout = {}) {
   g.addColorStop(1, '#f0cf86');
   o.fillStyle = g;
   // letterSpacing also pads after the last glyph; re-centre.
-  o.fillText('EBCORE', cx + (track * size1) / 2, y1);
+  o.fillText(layout.brand ?? 'EBCORE', cx + (track * size1) / 2, y1);
   // Specular sweep across the letters.
   const sx = lerp(-0.3, 1.3, easeOutCubic(range(t, 0.35, 0.98))) * W;
   const band = o.createLinearGradient(sx - size1 * 1.4, 0, sx + size1 * 1.4, size1 * 0.6);
@@ -91,7 +91,7 @@ export function drawTitle(ctx, W, H, t, layout = {}) {
   ctx.fillStyle = '#efd7a4';
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = size2 * 0.4;
-  ctx.fillText('L’Algérie, dans chaque bouchée.', cx, y2 + (1 - a2) * size2 * 0.35);
+  ctx.fillText(layout.tagline ?? 'L’Algérie, dans chaque bouchée.', cx, y2 + (1 - a2) * size2 * 0.35);
   ctx.restore();
 }
 

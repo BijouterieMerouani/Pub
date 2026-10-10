@@ -1,11 +1,14 @@
-import { DURATION } from './film.js';
-import { renderSoundtrack, encodeWav } from './audio.js';
+import { renderSoundtrack, renderAsselSoundtrack, encodeWav } from './audio.js';
 
 const params = new URLSearchParams(location.search);
-// 'photo' (default): built from the client's photographs. '3d': fully procedural cut.
-const FILM = params.get('film') === '3d' ? '3d' : 'photo';
-const { createFilm } = await import(FILM === '3d' ? './film.js' : './film-photo.js');
-const VARIANT = FILM === '3d' ? 'crack' : 'tour';
+// Films in this project. ?film=assel (default) | ebcore | 3d
+const FILMS = {
+  assel: { module: './film-assel.js', name: 'assel', brand: 'ASSEL', score: async () => renderAsselSoundtrack(undefined, (await (await fetch('themes/themes.json')).json()).themes.map((t) => t.id)) },
+  ebcore: { module: './film-photo.js', name: 'ebcore', brand: 'EBCORE', score: () => renderSoundtrack(undefined, { variant: 'tour' }) },
+  '3d': { module: './film.js', name: 'ebcore-3d', brand: 'EBCORE', score: () => renderSoundtrack(undefined, { variant: 'crack' }) },
+};
+const FILM = FILMS[params.get('film')] || FILMS.assel;
+const { createFilm, DURATION } = await import(FILM.module);
 const FORMATS = { '9x16': [1080, 1920], '16x9': [1920, 1080] };
 
 // --- Capture mode: driven frame by frame by tools/render.mjs.
@@ -16,11 +19,13 @@ if (params.has('capture')) {
   window.EB = {
     size: film.size,
     scene: film.scene,
+    duration: DURATION,
+    name: FILM.name,
     frame(t, type = 'image/png') {
       return film.renderAt(t).toDataURL(type);
     },
     async soundtrackWav() {
-      const wav = new Uint8Array(encodeWav(await renderSoundtrack(undefined, { variant: VARIANT })));
+      const wav = new Uint8Array(encodeWav(await FILM.score()));
       let s = '';
       for (let i = 0; i < wav.length; i += 0x8000) s += String.fromCharCode(...wav.subarray(i, i + 0x8000));
       return btoa(s);
@@ -42,6 +47,8 @@ async function player() {
   let format = params.get('format') === '16x9' ? '16x9' : '9x16';
   const still = params.has('t') ? parseFloat(params.get('t')) : null;
 
+  document.getElementById('brand').textContent = FILM.brand;
+  document.title = `${FILM.brand} — Publicité ${DURATION} s`;
   status.textContent = 'Préparation de la scène…';
   const film = await createFilm({ width: 2, height: 2 });
   stage.appendChild(film.canvas);
@@ -111,7 +118,7 @@ async function player() {
 
   film.renderAt(0);
   status.textContent = 'Composition de la bande-son…';
-  buffer = await renderSoundtrack(undefined, { variant: VARIANT });
+  buffer = await FILM.score();
   status.textContent = '';
   startBtn.disabled = false;
   startBtn.addEventListener('click', play);
@@ -119,6 +126,7 @@ async function player() {
 
   // Offer the rendered MP4s only if they have been exported.
   for (const a of document.querySelectorAll('[data-mp4]')) {
+    a.href = `export/${FILM.name}-${a.dataset.mp4}.mp4`;
     fetch(a.getAttribute('href'), { method: 'HEAD' }).then((r) => { if (r.ok) a.hidden = false; }).catch(() => {});
   }
 }
