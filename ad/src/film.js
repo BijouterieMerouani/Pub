@@ -414,7 +414,7 @@ function makeShardGeo(r, seed) {
 
 // ---------------------------------------------------------------------------
 // Shaders.
-const particleVS = /* glsl */ `
+export const particleVS = /* glsl */ `
 attribute vec4 aSeed;
 uniform float uTime, uSize, uFocus, uBlur, uProj, uGold, uSwirl, uAmbient, uBeamAmt, uBeamRadius;
 uniform vec3 uCenter, uExtent, uWind, uBeamPos, uBeamDir;
@@ -442,7 +442,7 @@ void main(){
   vCoc = clamp(coc, 0.0, 1.0);
   gl_Position = projectionMatrix * mv;
 }`;
-const particleFS = /* glsl */ `
+export const particleFS = /* glsl */ `
 varying float vAlpha; varying vec3 vColor; varying float vCoc;
 void main(){
   float d = length(gl_PointCoord - 0.5) * 2.0;
@@ -453,7 +453,7 @@ void main(){
   gl_FragColor = vec4(vColor * a * vAlpha, 1.0);
 }`;
 
-function makeParticles(count, seed) {
+export function makeParticles(count, seed) {
   const r = rng(seed);
   const g = new THREE.BufferGeometry();
   const seeds = new Float32Array(count * 4).map(() => r());
@@ -561,7 +561,7 @@ function skyMaterial() {
   });
 }
 
-const clampShader = {
+export const clampShader = {
   uniforms: { tDiffuse: { value: null } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
   fragmentShader: `uniform sampler2D tDiffuse; varying vec2 vUv;
@@ -570,7 +570,7 @@ const clampShader = {
       gl_FragColor = vec4(clamp(c.rgb, 0.0, 40.0), 1.0); }`,
 };
 
-const gradeShader = {
+export const gradeShader = {
   uniforms: {
     tDiffuse: { value: null }, uTime: { value: 0 }, uFade: { value: 1 }, uFlash: { value: 0 },
     uVignette: { value: 0.55 }, uGrain: { value: 0.035 }, uAberr: { value: 0.006 }, uRes: { value: new THREE.Vector2(1, 1) },

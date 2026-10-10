@@ -17,7 +17,9 @@ const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
 // D Hijaz: D Eb F# G A Bb C
 const D3 = 50, Eb3 = 51, Fs3 = 54, G3 = 55, A3 = 57, Bb3 = 58, C4 = 60, D4 = 62;
 
-export async function renderSoundtrack(sr = SAMPLE_RATE) {
+// variant 'crack' (3D cut: bonbon cracks, shards, pour) or 'tour' (photo cut:
+// four macro shots on the beat at 4.0 / 4.75 / 5.5 / 6.25 s).
+export async function renderSoundtrack(sr = SAMPLE_RATE, { variant = 'crack' } = {}) {
   const ctx = new OfflineAudioContext(2, sr * LEN, sr);
   const R = rng(1987);
 
@@ -254,59 +256,78 @@ export async function renderSoundtrack(sr = SAMPLE_RATE) {
     out(a, { wet: 0.4 });
   }
 
-  // Chocolate snap: a cluster of bright, resonant micro-cracks.
-  const crack = (t, count, spread, gain) => {
-    for (let i = 0; i < count; i++) {
-      const tt = t + (i === 0 ? 0 : Math.pow(R(), 1.6) * spread);
-      const len = 0.004 + R() * 0.01;
-      const s = noiseSrc(tt, len + 0.02);
-      const bp = filter('bandpass', 2200 + R() * 4200, 3 + R() * 6);
+  // Photo cut: one accent per chocolate, rising through the Hijaz scale.
+  const tourAccents = () => {
+    [[4.0, D4 + 12], [4.75, Fs3 + 24], [5.5, A3 + 24], [6.25, D4 + 24]].forEach(([t, n], i) => {
+      if (i) whoosh(t - 0.22, 0.24, 500, 4200, 0.16, i % 2 ? 0.35 : -0.35);
+      thump(t, 140, 48, 0.3, 0.42);
+      bell(t + 0.01, midi(n), 0.045, 1.6, (i - 1.5) * 0.3);
+      for (let j = 0; j < 4; j++) bell(t + 0.08 + R() * 0.5, 2600 + R() * 4000, 0.007, 0.5, R() * 2 - 1);
+    });
+    // A soft swell under the last shot, then into the flare at 7.0.
+    const s = noiseSrc(6.3, 0.7);
+    const lp = filter('lowpass', 700, 0.7);
+    const a = ctx.createGain();
+    env(a.gain, [[6.3, 0], [6.95, 0.08], [7.0, 0]]);
+    s.connect(lp).connect(a);
+    out(a, { wet: 0.4 });
+  };
+  const crackSection = () => {
+    // Chocolate snap: a cluster of bright, resonant micro-cracks.
+    const crack = (t, count, spread, gain) => {
+      for (let i = 0; i < count; i++) {
+        const tt = t + (i === 0 ? 0 : Math.pow(R(), 1.6) * spread);
+        const len = 0.004 + R() * 0.01;
+        const s = noiseSrc(tt, len + 0.02);
+        const bp = filter('bandpass', 2200 + R() * 4200, 3 + R() * 6);
+        const a = ctx.createGain();
+        const g = gain * (i === 0 ? 1 : 0.25 + R() * 0.6);
+        env(a.gain, [[tt, 0], [tt + 0.0008, g], [tt + len, 0.0001, 'exp']]);
+        s.connect(bp).connect(a);
+        out(a, { wet: 0.25, pan: (R() - 0.5) * 0.6 });
+      }
+    };
+    crack(4.55, 3, 0.02, 0.35);
+    crack(4.75, 14, 0.09, 1.0);
+    thump(4.75, 180, 70, 0.12, 0.5);
+    // Cinematic boom under the crack.
+    thump(4.76, 70, 26, 1.6, 0.95);
+    {
+      const s = noiseSrc(4.75, 1.2);
+      const lp = filter('lowpass', 260, 0.7);
       const a = ctx.createGain();
-      const g = gain * (i === 0 ? 1 : 0.25 + R() * 0.6);
-      env(a.gain, [[tt, 0], [tt + 0.0008, g], [tt + len, 0.0001, 'exp']]);
-      s.connect(bp).connect(a);
-      out(a, { wet: 0.25, pan: (R() - 0.5) * 0.6 });
+      env(a.gain, [[4.75, 0], [4.77, 0.5], [5.9, 0.0001, 'exp']]);
+      s.connect(lp).connect(a);
+      out(a, { wet: 0.6 });
+    }
+    // Slow-motion shards: delicate tinkles.
+    for (let i = 0; i < 9; i++) bell(4.9 + i * 0.13 + R() * 0.05, 1800 + R() * 2600, 0.01, 0.5, R() * 2 - 1);
+
+    // 5.2 and 6.1 cut whooshes.
+    whoosh(5.0, 0.32, 400, 3500, 0.2, 0.4);
+    whoosh(5.9, 0.32, 350, 3000, 0.2, -0.4);
+
+    // 6.15-7.0 Pour: low gloopy liquid with a soft splash on landing.
+    {
+      const s = noiseSrc(6.15, 0.9);
+      const lp = filter('lowpass', 500, 4);
+      env(lp.frequency, [[6.15, 300], [6.6, 900, 'exp'], [7.0, 450]]);
+      const a = ctx.createGain();
+      env(a.gain, [[6.15, 0], [6.3, 0.12], [6.9, 0.16], [7.0, 0]]);
+      s.connect(lp).connect(a);
+      out(a, { wet: 0.25 });
+      for (let i = 0; i < 6; i++) {
+        const t = 6.58 + i * 0.065 + R() * 0.03;
+        const o = osc('sine', 340 - i * 20, t, t + 0.12);
+        o.frequency.exponentialRampToValueAtTime(140, t + 0.1);
+        const g = ctx.createGain();
+        env(g.gain, [[t, 0], [t + 0.005, 0.1], [t + 0.1, 0.0001, 'exp']]);
+        o.connect(g);
+        out(g, { wet: 0.2 });
+      }
     }
   };
-  crack(4.55, 3, 0.02, 0.35);
-  crack(4.75, 14, 0.09, 1.0);
-  thump(4.75, 180, 70, 0.12, 0.5);
-  // Cinematic boom under the crack.
-  thump(4.76, 70, 26, 1.6, 0.95);
-  {
-    const s = noiseSrc(4.75, 1.2);
-    const lp = filter('lowpass', 260, 0.7);
-    const a = ctx.createGain();
-    env(a.gain, [[4.75, 0], [4.77, 0.5], [5.9, 0.0001, 'exp']]);
-    s.connect(lp).connect(a);
-    out(a, { wet: 0.6 });
-  }
-  // Slow-motion shards: delicate tinkles.
-  for (let i = 0; i < 9; i++) bell(4.9 + i * 0.13 + R() * 0.05, 1800 + R() * 2600, 0.01, 0.5, R() * 2 - 1);
-
-  // 5.2 and 6.1 cut whooshes.
-  whoosh(5.0, 0.32, 400, 3500, 0.2, 0.4);
-  whoosh(5.9, 0.32, 350, 3000, 0.2, -0.4);
-
-  // 6.15-7.0 Pour: low gloopy liquid with a soft splash on landing.
-  {
-    const s = noiseSrc(6.15, 0.9);
-    const lp = filter('lowpass', 500, 4);
-    env(lp.frequency, [[6.15, 300], [6.6, 900, 'exp'], [7.0, 450]]);
-    const a = ctx.createGain();
-    env(a.gain, [[6.15, 0], [6.3, 0.12], [6.9, 0.16], [7.0, 0]]);
-    s.connect(lp).connect(a);
-    out(a, { wet: 0.25 });
-    for (let i = 0; i < 6; i++) {
-      const t = 6.58 + i * 0.065 + R() * 0.03;
-      const o = osc('sine', 340 - i * 20, t, t + 0.12);
-      o.frequency.exponentialRampToValueAtTime(140, t + 0.1);
-      const g = ctx.createGain();
-      env(g.gain, [[t, 0], [t + 0.005, 0.1], [t + 0.1, 0.0001, 'exp']]);
-      o.connect(g);
-      out(g, { wet: 0.2 });
-    }
-  }
+  variant === 'tour' ? tourAccents() : crackSection();
 
   // 7.0 Flare + Hijaz phrase + darbuka.
   whoosh(6.75, 0.3, 500, 6000, 0.3);

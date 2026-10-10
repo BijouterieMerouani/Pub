@@ -1,7 +1,11 @@
-import { createFilm, DURATION } from './film.js';
+import { DURATION } from './film.js';
 import { renderSoundtrack, encodeWav } from './audio.js';
 
 const params = new URLSearchParams(location.search);
+// 'photo' (default): built from the client's photographs. '3d': fully procedural cut.
+const FILM = params.get('film') === '3d' ? '3d' : 'photo';
+const { createFilm } = await import(FILM === '3d' ? './film.js' : './film-photo.js');
+const VARIANT = FILM === '3d' ? 'crack' : 'tour';
 const FORMATS = { '9x16': [1080, 1920], '16x9': [1920, 1080] };
 
 // --- Capture mode: driven frame by frame by tools/render.mjs.
@@ -16,7 +20,7 @@ if (params.has('capture')) {
       return film.renderAt(t).toDataURL(type);
     },
     async soundtrackWav() {
-      const wav = new Uint8Array(encodeWav(await renderSoundtrack()));
+      const wav = new Uint8Array(encodeWav(await renderSoundtrack(undefined, { variant: VARIANT })));
       let s = '';
       for (let i = 0; i < wav.length; i += 0x8000) s += String.fromCharCode(...wav.subarray(i, i + 0x8000));
       return btoa(s);
@@ -107,7 +111,7 @@ async function player() {
 
   film.renderAt(0);
   status.textContent = 'Composition de la bande-son…';
-  buffer = await renderSoundtrack();
+  buffer = await renderSoundtrack(undefined, { variant: VARIANT });
   status.textContent = '';
   startBtn.disabled = false;
   startBtn.addEventListener('click', play);

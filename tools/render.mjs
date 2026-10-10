@@ -4,6 +4,7 @@
 //
 //   node tools/render.mjs                      # both formats -> ad/export/*.mp4
 //   node tools/render.mjs --format 9x16 --fps 30
+//   node tools/render.mjs --film 3d               # procedural 3D cut -> ad/export/ebcore-3d-*.mp4
 //   node tools/render.mjs --stills 0.5,2.4,5.6 --format 16x9 --out /tmp/stills
 import { chromium } from 'playwright-core';
 import http from 'node:http';
@@ -20,9 +21,11 @@ const FPS = Number(args.fps || 30);
 const DURATION = 10;
 const formats = args.format && args.format !== true ? [args.format] : ['9x16', '16x9'];
 const outDir = path.resolve(args.out && args.out !== true ? args.out : path.join(ROOT, 'export'));
+const FILM = args.film === '3d' ? '3d' : 'photo';
+const SUFFIX = FILM === '3d' ? '-3d' : '';
 const CHROME = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell';
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf', '.mp4': 'video/mp4', '.png': 'image/png' };
+const MIME = { '.jpg': 'image/jpeg', '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf', '.mp4': 'video/mp4', '.png': 'image/png' };
 function serve() {
   const server = http.createServer((req, res) => {
     const p = path.join(ROOT, decodeURIComponent(new URL(req.url, 'http://x').pathname));
@@ -40,7 +43,7 @@ async function openFilm(browser, port, format) {
   const page = await browser.newPage();
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log(`[page ${m.type()}]`, m.text()); });
   page.on('pageerror', (e) => console.log('[page error]', e.message));
-  await page.goto(`http://127.0.0.1:${port}/index.html?capture=1&format=${format}`);
+  await page.goto(`http://127.0.0.1:${port}/index.html?capture=1&format=${format}&film=${FILM}`);
   await page.waitForFunction(() => window.EB_READY === true, null, { timeout: 120000 });
   return page;
 }
@@ -61,7 +64,7 @@ async function main() {
       for (const format of formats) {
         const page = await openFilm(browser, port, format);
         for (const t of times) {
-          const file = path.join(outDir, `still-${format}-${t.toFixed(2)}.png`);
+          const file = path.join(outDir, `still${SUFFIX}-${format}-${t.toFixed(2)}.png`);
           fs.writeFileSync(file, dataUrlToBuffer(await page.evaluate((tt) => window.EB.frame(tt), t)));
           console.log('wrote', file);
         }
@@ -74,11 +77,11 @@ async function main() {
     for (const format of formats) {
       const page = await openFilm(browser, port, format);
       if (!wavPath) {
-        wavPath = path.join(outDir, 'ebcore-soundtrack.wav');
+        wavPath = path.join(outDir, `ebcore${SUFFIX}-soundtrack.wav`);
         fs.writeFileSync(wavPath, Buffer.from(await page.evaluate(() => window.EB.soundtrackWav()), 'base64'));
         console.log('wrote', wavPath);
       }
-      const mp4 = path.join(outDir, `ebcore-${format}.mp4`);
+      const mp4 = path.join(outDir, `ebcore${SUFFIX}-${format}.mp4`);
       const ff = spawn('ffmpeg', [
         '-y', '-loglevel', 'error',
         '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-',

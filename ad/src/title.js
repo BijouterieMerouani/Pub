@@ -4,12 +4,12 @@ import { lerp, range, smooth, easeOutCubic } from './util.js';
 // t is seconds since the packshot cut (9.0s); the card is legible by ~0.6s.
 let off = null;
 
-export function drawTitle(ctx, W, H, t) {
+export function drawTitle(ctx, W, H, t, layout = {}) {
   if (t <= 0) return;
   const portrait = H > W;
   const base = Math.min(W, H);
   const cx = W / 2;
-  const y1 = portrait ? H * 0.745 : H * 0.79;
+  const y1 = H * (portrait ? layout.portrait ?? 0.745 : layout.landscape ?? 0.79);
   const size1 = base * (portrait ? 0.115 : 0.095);
   const size2 = base * (portrait ? 0.052 : 0.042);
   const y2 = y1 + size1 * 0.95;
@@ -92,5 +92,29 @@ export function drawTitle(ctx, W, H, t) {
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = size2 * 0.4;
   ctx.fillText('L’Algérie, dans chaque bouchée.', cx, y2 + (1 - a2) * size2 * 0.35);
+  ctx.restore();
+}
+
+// Small two-line caption (region + flavour) used over the macro shots.
+export function drawCaption(ctx, W, H, alpha, title, subtitle) {
+  if (alpha <= 0) return;
+  const portrait = H > W;
+  const base = Math.min(W, H);
+  const y = H * (portrait ? 0.83 : 0.84);
+  const s1 = base * (portrait ? 0.034 : 0.028);
+  const s2 = base * (portrait ? 0.046 : 0.038);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.75)';
+  ctx.shadowBlur = s2 * 0.6;
+  ctx.font = `600 ${s1}px Cinzel`;
+  ctx.letterSpacing = `${s1 * 0.45}px`;
+  ctx.fillStyle = '#e2b25c';
+  ctx.fillText(title, W / 2 + s1 * 0.22, y);
+  ctx.font = `italic 500 ${s2}px "Cormorant Garamond"`;
+  ctx.letterSpacing = `${s2 * 0.02}px`;
+  ctx.fillStyle = '#f1dcb0';
+  ctx.fillText(subtitle, W / 2, y + s2 * 1.15);
   ctx.restore();
 }
