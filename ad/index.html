@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EBCORE — Publicité 10 s</title>
+  <style>
+    @font-face { font-family: Cinzel; src: url(fonts/Cinzel.ttf); font-weight: 400 900; }
+    :root { --gold: #d9a952; --ink: #0a0604; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #000; color: #e9d4a8; font: 14px/1.4 system-ui, sans-serif; }
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; overflow: hidden; }
+    #stage { position: relative; background: #000; box-shadow: 0 0 0 1px #2a1a0c, 0 30px 80px #000; }
+    #stage canvas { display: block; }
+    #cover {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+      background: radial-gradient(ellipse at 50% 45%, rgba(40,20,8,.35), rgba(0,0,0,.85));
+      transition: opacity .6s;
+    }
+    .playing #cover, .still #cover { opacity: 0; pointer-events: none; }
+    #cover h1 { margin: 0; font: 600 clamp(28px, 6vmin, 54px) Cinzel, serif; letter-spacing: .3em; padding-left: .3em; color: var(--gold); }
+    button {
+      font: 600 13px/1 Cinzel, serif; letter-spacing: .18em; text-transform: uppercase; color: #f3dfb3;
+      background: transparent; border: 1px solid #8a6326; padding: 12px 20px; cursor: pointer;
+    }
+    button:hover:not(:disabled) { border-color: var(--gold); background: rgba(217,169,82,.08); }
+    button:disabled { opacity: .4; cursor: wait; }
+    #start { padding: 16px 28px; font-size: 14px; }
+    #status { min-height: 1.4em; font-size: 12px; opacity: .7; letter-spacing: .05em; }
+    #bar { width: min(560px, 100%); display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    #track { position: relative; height: 2px; width: min(560px, 100%); background: #24170b; overflow: hidden; }
+    #progress { position: absolute; inset: 0; background: var(--gold); transform-origin: 0 50%; transform: scaleX(0); }
+    #replay { display: none; }
+    .ended #replay { display: inline-block; }
+    [aria-pressed="true"] { border-color: var(--gold); background: rgba(217,169,82,.14); }
+    a[data-mp4] { color: #d9b77a; font-size: 12px; letter-spacing: .06em; }
+    a[hidden] { display: none; }
+    .still #bar, .still #track { display: none; }
+  </style>
+  <script type="importmap">
+    { "imports": {
+      "three": "./vendor/three/build/three.module.min.js",
+      "three/addons/": "./vendor/three/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <div id="stage">
+    <div id="cover">
+      <h1>EBCORE</h1>
+      <button id="start" disabled>▶ Lancer la publicité</button>
+      <div id="status"></div>
+    </div>
+  </div>
+  <div id="track"><div id="progress"></div></div>
+  <div id="bar">
+    <button id="replay">↻ Rejouer</button>
+    <button data-format="9x16">9:16</button>
+    <button data-format="16x9">16:9</button>
+    <a data-mp4 hidden href="export/ebcore-9x16.mp4" download>MP4 9:16</a>
+    <a data-mp4 hidden href="export/ebcore-16x9.mp4" download>MP4 16:9</a>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

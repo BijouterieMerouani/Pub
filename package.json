@@ -1,0 +1,21 @@
+{
+  "name": "ebcore-ad",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EBCORE — publicité cinématographique de 10 secondes (Three.js + bande-son synthétisée), exportable en MP4 9:16 et 16:9.",
+  "type": "module",
+  "scripts": {
+    "preview": "node tools/serve.mjs",
+    "render": "node tools/render.mjs",
+    "render:vertical": "node tools/render.mjs --format 9x16",
+    "render:horizontal": "node tools/render.mjs --format 16x9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BijouterieMerouani/Pub.git"
+  },
+  "dependencies": {
+    "playwright-core": "^1.48.2",
+    "three": "^0.169.0"
+  }
+}
