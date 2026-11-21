@@ -4,5 +4,6 @@
   "boom": 22.5367,
   "loop_from_bar": 4,
   "loop_to_bar": 2,
-  "end": 24.0
+  "end": 22.47,
+  "boom_gain": 0.62
 }

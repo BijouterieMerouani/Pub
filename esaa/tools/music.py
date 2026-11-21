@@ -4,7 +4,8 @@ La musique (extrait TikTok) dure 24 s :
     0 – 4,09 s   intro (effets + roulement)
     4,09 – 22,4  groove à 94,9 BPM, motif 3+3+2 (accents sur les croches 0, 3 et 6
                  de chaque mesure de 2,53 s)
-    22,54        un gros « BOUM » final, puis plus rien.
+    22,47        fin du son de la vidéo ; à 22,54 démarre le jingle du logo TikTok,
+                 qu'on n'utilise pas : on le remplace par notre propre BOUM (synth_boom).
 Pour tenir 30 s, on rejoue deux mesures (raccord mesure 4 -> mesure 2, même accord)
 et on prolonge le BOUM par une réverbération. La grille reste continue : toutes
 les coupes du film tombent sur les accents de la musique.
@@ -63,7 +64,9 @@ def analyse(path):
     _, E, bar0 = best
     boom = float(np.argmax(np.abs(y[int(22.3 * sr):int(22.9 * sr)]) > 0.3) / sr + 22.3)
     meta = {"eighth": round(E, 5), "bar0": round(bar0, 4), "boom": round(boom, 4),
-            "loop_from_bar": 4, "loop_to_bar": 2, "end": 24.0}
+            "loop_from_bar": 4, "loop_to_bar": 2,
+            "end": 22.47,          # avant le jingle TikTok (logo de fin de la vidéo téléchargée)
+            "boom_gain": 0.62}
     with open(META, "w") as f:
         json.dump(meta, f, indent=2)
     return meta
@@ -107,6 +110,32 @@ def _reverb_ir(seconds=2.8, sr=SR, seed=7):
     return ir / np.sqrt((ir ** 2).sum(0, keepdims=True))
 
 
+def synth_boom(seconds=2.2, sr=SR, seed=11):
+    """Notre propre impact (remplace le son du logo TikTok) : sub qui plonge de 120 à 38 Hz,
+    coup sourd à 95 Hz, attaque de bruit très courte et un souffle grave. Stéréo."""
+    rng = np.random.default_rng(seed)
+    n = int(seconds * sr)
+    t = np.arange(n) / sr
+    f = 38 + 82 * np.exp(-t / 0.06)
+    sub = np.sin(2 * np.pi * np.cumsum(f) / sr) * (1 - np.exp(-t / 0.002)) * np.exp(-t / 0.42)
+    thump = np.sin(2 * np.pi * 95 * t) * np.exp(-t / 0.09)
+    out = np.zeros((n, 2))
+    for c in range(2):
+        noise = rng.standard_normal(n)
+        click = np.diff(noise, prepend=0) * np.exp(-t / 0.010) * 0.35
+        air = np.convolve(noise, np.ones(48) / 48, mode="same") * np.exp(-t / 0.35) * 1.4
+        out[:, c] = sub + 0.55 * thump + click + air
+    out = np.tanh(1.8 * out) / np.tanh(1.8)
+    return out / np.abs(out).max()
+
+
+def _highpass(x, fc, sr=SR):
+    X = np.fft.rfft(x, axis=0)
+    f = np.fft.rfftfreq(len(x), 1 / sr)[:, None]
+    X *= 1 - np.exp(-(f / fc) ** 4)
+    return np.fft.irfft(X, len(x), axis=0)
+
+
 def _fftconv(x, h):
     n = len(x) + len(h) - 1
     N = 1 << (n - 1).bit_length()
@@ -138,14 +167,20 @@ def build(path, out_wav, meta=None):
     t = np.linspace(0, np.pi / 2, xf)[:, None]
     head = x[:j - xf // 2]
     cross = x[j - xf // 2:j - xf // 2 + xf] * np.cos(t) + x[i - xf // 2:i - xf // 2 + xf] * np.sin(t)
-    tail = x[i - xf // 2 + xf:int(meta["end"] * sr)]
+    tail = x[i - xf // 2 + xf:int(meta["end"] * sr)].copy()
+    fo = int(0.06 * sr)                    # la musique s'arrête juste avant le son TikTok
+    tail[-fo:] *= np.linspace(1, 0, fo)[:, None]
     y = np.vstack([head, cross, tail]).astype(np.float64)
 
     n = int(LENGTH * sr)
     y = np.vstack([y, np.zeros((max(0, n - len(y)), 2))])[:n]
+    # notre BOUM, au même instant que celui de la vidéo d'origine (le slogan est calé dessus)
+    b = int(g.boom * sr)
+    boom = synth_boom()[:n - b]
+    y[b:b + len(boom)] += meta.get("boom_gain", 0.62) * boom
     # réverbération sur le BOUM (et seulement lui)
     b = int((g.boom - 0.01) * sr)
-    hit = y[b:].copy()
+    hit = _highpass(y[b:].copy(), 180.0)   # pas de réverbération sur le sub : la fin reste nette
     wet = _fftconv(hit, _reverb_ir())[:len(hit)]
     y[b:] += 0.42 * wet
     # fin : fondu sur les 0,9 dernières secondes
