@@ -58,8 +58,8 @@ TIMELINE = [
     ("6931", 0.80, 2),
     ("6932", 0.00, 1),
     ("6933", 7.80, 2),
-    # Mesure 5 : fous rires, puis les diplômes
-    ("7557711C", 2.80, 1),
+    # Mesure 5 : la salle des ateliers, puis les diplômes
+    ("6930", 0.20, 1),
     ("6947", 1.60, 2),
     # Mesures 6-7 : remise des diplômes
     ("6949", 2.30, 1),
