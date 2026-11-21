@@ -52,36 +52,40 @@ def S(src, t_in, beats=None, cy=0.45, speed=1.0, until=None, alt16=None, cx=0.5,
                 cx=cx, pan=pan, dark=dark, box9=box9, box16=box16, focus=focus)
 
 
+# Règle de montage : chaque plan montre quelqu'un qui fait coucou ou une vraie action
+# (pas de préparation de salle, pas de décor vide, pas de gens qui attendent).
 INTRO = [  # titre par-dessus, image assombrie (le jaune ressort), le groove « ouvre » l'image
-    S("6876", 0.10, until=HITS[1], cy=0.27, dark=True),      # on accroche les lettres
-    S("6877", 0.30, until=3.595, cy=0.40, dark=True),        # BIENVENUE au mur
-    S("6878", 0.50, until=4.776, cy=0.45, dark=True),        # la salle se prépare
-    S("6886", 0.30, until=DROP, cy=0.50, dark=True),         # buffet et déco
+    S("6899", 0.30, until=HITS[1], cy=0.40, speed=0.5, dark=True),   # trio qui salue
+    S("6914", 0.10, until=3.595, cy=0.45, dark=True),                # l'équipe du stand salue
+    S("6916", 4.00, until=4.776, cy=0.40, dark=True),                # coucou sous BIENVENUE
+    S("6897", 3.40, until=DROP, cy=0.38, speed=0.5, dark=True),      # coucou à deux mains
 ]
 ACTS = [
-    # 1. Arrivée, accueil (du DROP au temps 16)
-    [S("6885", 0.20, 2, cy=0.52), S("6886", 3.80, 2, cy=0.42), S("6879", 0.20, 1, cy=0.62),
-     S("6880", 6.40, 2, cy=0.36), S("6900", 0.80, 1, cy=0.50), S("6881", 0.30, 1, cy=0.60),
-     S("6887", 0.20, 2, cy=0.30, speed=0.5), S("6888", 0.00, 2, cy=0.36, speed=0.5),
-     S("6890", 0.00, 2, cy=0.30, speed=0.5), S("6891", 0.00, 1, cy=0.40, speed=0.5),
-     S("6893", 0.30, 1, cy=0.40, speed=0.5), S("6896", 0.40, 1, cy=0.42, speed=0.5)],
-    # 2. Les stands, l'économie en jeu (billets, jetons)
-    [S("6914", 1.20, 2, cy=0.52), S("6915", 0.70, 1, cy=0.82), S("6901", 0.00, 2, cy=0.58),
-     S("6904", 0.10, 1, cy=0.50), S("6906", 0.30, 2, cy=0.46), S("6919", 0.20, 1, cy=0.45),
-     S("6899", 0.40, 2, cy=0.40, speed=0.5), S("6897", 0.30, 1, cy=0.38, speed=0.5),
-     S("6916", 4.00, 2, cy=0.40), S("6895", 0.10, 1, cy=0.40, speed=0.5), S("6905", 0.00, 1, cy=0.40)],
+    # 1. Les coucous (du DROP au temps 16) : ralentis 50 % sur les vidéos 4K à 60 i/s
+    [S("6888", 0.00, 2, cy=0.47, speed=0.5), S("6890", 0.00, 2, cy=0.34, speed=0.5),
+     S("6903", 1.10, 1, cy=0.36), S("6893", 0.20, 2, cy=0.40, speed=0.5),
+     S("6902", 1.40, 1, cy=0.50), S("6896", 0.30, 2, cy=0.42, speed=0.5),
+     S("6904", 4.30, 1, cy=0.40), S("6891", 0.00, 1, cy=0.40, speed=0.5),
+     S("6897", 0.30, 2, cy=0.38, speed=0.5), S("6895", 0.10, 1, cy=0.40, speed=0.5),
+     S("6906", 1.40, 1, cy=0.46), S("6899", 1.60, 1, cy=0.36, speed=0.5),
+     S("6889", 0.00, 1, cy=0.47, speed=0.5)],
+    # 2. Les stands et l'économie : billets, stand « 2 pour 1 jeton », fous rires
+    [S("6915", 0.20, 2, cy=0.55), S("6901", 0.00, 2, cy=0.58), S("6904", 0.10, 1, cy=0.50),
+     S("6919", 0.20, 1, cy=0.45), S("6906", 2.60, 1, cy=0.42), S("6914", 7.30, 2, cy=0.50),
+     S("6904", 1.70, 1, cy=0.45), S("6918", 0.20, 1, cy=0.45), S("6906", 8.00, 1, cy=0.42),
+     S("6898", 0.20, 1, cy=0.38, speed=0.5), S("7557711C", 4.60, 2, cy=0.42),
+     S("6934", 1.20, 1, cy=0.50)],
     # 3. Ateliers
-    [S("6931", 0.80, 2, cy=0.52), S("6932", 0.00, 1, cy=0.42), S("6933", 7.80, 2, cy=0.45),
-     S("6935", 0.20, 1, cy=0.72), S("6931", 13.30, 1, cy=0.55), S("6933", 0.30, 1, cy=0.50),
-     S("still:lego", 0, 1, alt16=S("6945", 0.10, 1, cy=0.52)), S("6930", 0.20, 1, cy=0.50),
-     S("6934", 9.40, 2, cy=0.60), S("6935", 4.80, 1, cy=0.50), S("6902", 1.50, 1, cy=0.55),
-     S("6903", 1.10, 1, cy=0.36), S("6906", 8.20, 1, cy=0.45)],
-    # 4. Présentations et remise des diplômes
-    [S("6942", 1.00, 2, cy=0.36), S("6943", 3.80, 1, cy=0.45), S("6947", 1.60, 2, cy=0.42),
-     S("6948", 0.20, 1, cy=0.50), S("6949", 2.30, 1, cy=0.50), S("6950", 1.20, 1, cy=0.45),
-     S("6944", 4.00, 1, cy=0.50), S("6952", 0.60, 1, cy=0.45), S("6953", 1.20, 1, cy=0.42),
-     S("6954", 1.30, 2, cy=0.55), S("6945", 10.80, 1, cy=0.50), S("6950", 3.00, 1, cy=0.42),
-     S("6943", 6.30, 1, cy=0.42)],
+    [S("6931", 0.20, 2, cy=0.55), S("6933", 0.20, 1, cy=0.50), S("6932", 2.20, 1, cy=0.45),
+     S("6933", 6.60, 2, cy=0.45), S("6931", 1.50, 1, cy=0.52),
+     S("still:lego", 0, 1, alt16=S("6906", 4.40, 1, cy=0.45)), S("6933", 12.00, 1, cy=0.55),
+     S("6934", 9.20, 1, cy=0.55), S("6935", 3.40, 2, cy=0.55), S("6931", 12.30, 1, cy=0.55),
+     S("6945", 0.20, 1, cy=0.50), S("6934", 11.80, 2, cy=0.52)],
+    # 4. Remise des diplômes : les moments où ça bouge (on vient le chercher, on le reçoit, on saute)
+    [S("6942", 1.20, 2, cy=0.38), S("6945", 2.60, 1, cy=0.45), S("6947", 0.20, 2, cy=0.42),
+     S("6953", 0.05, 1, cy=0.42), S("6949", 1.80, 2, cy=0.50), S("6945", 7.20, 1, cy=0.45),
+     S("6950", 2.80, 1, cy=0.42), S("6952", 0.40, 1, cy=0.50), S("6943", 5.80, 1, cy=0.42),
+     S("6949", 0.15, 1, cy=0.45), S("6942", 18.60, 2, cy=0.55), S("6950", 3.45, 1, cy=0.42)],
     # 5. Photos de groupe en rafale, puis zooms sur trois parties de la photo 6921 (la plus
     #    nette), et pour finir la photo entière qui se dévoile, jusqu'au noir
     [S("photo:6925", 0, 2, cy=0.55, cx=0.30), S("photo:6922", 0, 1, cy=0.55, cx=0.70),

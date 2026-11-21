@@ -6,13 +6,16 @@ Projet associatif de l'ESAA : l'économie et la finance expliquées aux enfants.
 
 ## Montage
 
+Règle (les deux films) : chaque plan montre quelqu'un qui fait coucou ou une vraie action —
+pas de préparation de salle, pas de décor vide, pas de gens qui attendent, pas de poses figées.
+
 | Temps | Plan |
 | --- | --- |
-| 0 – 4,1 s | Préparation (lettres BIENVENUE). Titre **ESAA · Projet associatif** sur l'intro de la musique. |
-| 4,1 – 6,6 s | Accueil : buffet, ballons, stand. |
-| 6,6 – 11,7 s | L'économie en jeu : billets, stand « 2 pour 1 jeton ». |
+| 0 – 4,1 s | Premiers coucous (trio, équipe sous BIENVENUE). Titre **ESAA · Projet associatif** sur l'intro de la musique. |
+| 4,1 – 6,6 s | Coucous (deux garçons, la chaise qui vole derrière). |
+| 6,6 – 11,7 s | L'économie en jeu : coucou devant les billets, stand « 2 pour 1 jeton ». |
 | 11,7 – 17,7 s | Ateliers. |
-| 17,7 – 24,3 s | Remise des diplômes. |
+| 17,7 – 24,3 s | Remise des diplômes : on vient le chercher, on le reçoit, on saute devant la caméra. |
 | 24,3 – 26,9 s | Zooms sur trois parties de la photo de groupe 6921 (gauche, centre, droite), un par accent. |
 | 26,9 – 30 s | Carte de fin avec la photo 6921 entière ; au BOUM (27,6 s, notre propre impact : le son de fin de la vidéo TikTok était le jingle du logo) : « L’économie et la finance expliquées aux enfants ». |
 
@@ -44,11 +47,11 @@ qui commencent à 6,9 / 17,2 / 27,5 / 37,8 / 48,1 s (basse plus forte au début 
 
 | Temps | Chapitre |
 | --- | --- |
-| 0 – 5,6 s | Intro assombrie : on prépare la salle. **ESAA** apparaît sur le 1er coup (0,35 s) ; de 1,0 à 2,9 s la police change à chaque coup, puis se fixe ; sous-titre « Projet associatif · L'économie et la finance expliquées aux enfants ». |
-| 5,6 – 17,2 s | Arrivée, accueil (ralentis 50 % sur les vidéos 4K à 60 i/s). |
-| 17,2 – 27,5 s | Les stands et l'économie : billets, stand « 2 pour 1 jeton ». |
+| 0 – 5,6 s | Intro assombrie : premiers coucous. **ESAA** apparaît sur le 1er coup (0,35 s) ; de 1,0 à 2,9 s la police change à chaque coup, puis se fixe ; sous-titre « Projet associatif · L'économie et la finance expliquées aux enfants ». |
+| 5,6 – 17,2 s | Les coucous (ralentis 50 % sur les vidéos 4K à 60 i/s). |
+| 17,2 – 27,5 s | Les stands et l'économie : billets, stand « 2 pour 1 jeton », fous rires devant « Les Petits Génies de la Finance ». |
 | 27,5 – 37,8 s | Ateliers (photo du pouce levé en 9:16). |
-| 37,8 – 48,1 s | Présentations et remise des diplômes. |
+| 37,8 – 48,1 s | Remise des diplômes : les moments où ça bouge. |
 | 48,1 – 55,9 s | Photos de groupe en rafale, zooms sur trois parties de la photo 6921 (la plus nette), puis la photo entière qui se dévoile (dézoom), jusqu'au noir. |
 | 55,9 – 57,2 s | Noir, **ESAA · Projet associatif**. |
 

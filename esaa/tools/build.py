@@ -39,35 +39,37 @@ INK = (8, 32, 22)
 # d'accents ; l'accent 0 est l'arrivée du groove (4,09 s).
 FIRST_CUT = -3          # 1re coupe : accent -3 = début de la mesure d'intro (1,56 s)
 TIMELINE = [
-    # Intro (effets + roulement) : préparation + titre
-    ("6876", 0.10, None),  # on accroche les lettres BIENVENUE      0 -> 1,56
-    ("6877", 0.30, 3),     # la salle se prépare                 1,56 -> 4,09
-    # Mesure 0 : accueil
-    ("6879", 0.20, 1),     # le buffet
-    ("6886", 2.40, 1),     # ballons verts, rideau doré
-    ("6881", 0.30, 1),     # un stand
+    # Règle de montage : chaque plan montre quelqu'un qui fait coucou ou une vraie action
+    # (pas de préparation de salle, pas de décor vide, pas de gens qui attendent).
+    # Intro (effets + roulement) : premiers coucous + titre
+    ("6899", 0.30, None),  # trio qui salue                          0 -> 1,56
+    ("6916", 2.60, 3),     # l'équipe sous BIENVENUE, qui salue   1,56 -> 4,09
+    # Mesure 0 : coucous
+    ("6888", 0.00, 1),     # deux garçons qui saluent
+    ("6893", 0.30, 1),     # elle salue, il arrive en saluant
+    ("6890", 0.00, 1),     # coucou, une chaise vole derrière
     # Mesure 1 : l'économie en jeu
-    ("6901", 0.00, 1),     # billets sur la table
+    ("6901", 0.00, 1),     # coucou devant les billets
     ("6904", 0.00, 1),     # cœur avec les billets
-    ("6899", 0.50, 1),     # bonjour !
+    ("6896", 0.30, 1),     # le groupe salue
     # Mesure 2 : stand des jetons
-    ("6914", 1.20, 2),     # « 2 pour 1 jeton »
-    ("6897", 0.30, 1),
+    ("6915", 0.20, 2),     # « 2 pour 1 jeton » : l'équipe salue
+    ("6897", 0.30, 1),     # fou rire
     # Mesures 3-4 : ateliers
-    ("6916", 4.00, 1),
-    ("6931", 0.80, 2),
-    ("6932", 0.00, 1),
+    ("6902", 1.40, 1),     # coucou à deux mains
+    ("6931", 0.80, 2),     # on bricole
+    ("6906", 2.60, 1),     # cœurs avec les mains
     ("6933", 7.80, 2),
     # Mesure 5 : pouce levé devant le train en Lego, puis les diplômes
     ("still:lego", 0, 1),
-    ("6947", 1.60, 2),
-    # Mesures 6-7 : remise des diplômes
-    ("6949", 2.30, 1),
-    ("6950", 1.20, 1),
-    ("6953", 1.20, 1),
-    ("6954", 1.30, 1),
-    ("6952", 0.60, 1),
-    ("6948", 0.20, 1),
+    ("6947", 0.20, 2),     # il vient chercher son diplôme
+    # Mesures 6-7 : remise des diplômes (les moments où ça bouge)
+    ("6949", 2.30, 1),     # il saute devant la caméra
+    ("6950", 2.80, 1),     # fou rire avec les animatrices
+    ("6953", 0.05, 1),     # on lui tend son diplôme
+    ("6945", 7.20, 1),     # remise du diplôme
+    ("6952", 0.50, 1),     # il saute dans le cadre
+    ("6943", 5.80, 1),     # il repart avec son diplôme
     # Mesure 8 : zooms sur trois parties de la photo de groupe, un par accent
     ("part:6921:L", 0, 1),
     ("part:6921:C", 0, 1),
