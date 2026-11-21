@@ -58,8 +58,8 @@ TIMELINE = [
     ("6931", 0.80, 2),
     ("6932", 0.00, 1),
     ("6933", 7.80, 2),
-    # Mesure 5 : la salle des ateliers, puis les diplômes
-    ("6930", 0.20, 1),
+    # Mesure 5 : pouce levé devant le train en Lego, puis les diplômes
+    ("still:lego", 0, 1),
     ("6947", 1.60, 2),
     # Mesures 6-7 : remise des diplômes
     ("6949", 2.30, 1),
@@ -251,6 +251,21 @@ def photo_pan(key, n):
         yield im.resize((W, H), Image.BICUBIC, box=(x0, y0, x0 + cw, y0 + ch))
 
 
+def photo_still(key, n, amount=0.045):
+    """Photo verticale plein cadre, léger zoom avant (comme les plans vidéo)."""
+    im = load_photo(key)
+    iw, ih = im.size
+    if iw / ih > W / H:
+        cw, ch = ih * W / H, ih
+    else:
+        cw, ch = iw, iw * H / W
+    for i in range(n):
+        s = 1.0 + amount * i / max(n - 1, 1)
+        bw, bh = cw / s, ch / s
+        x0, y0 = (iw - bw) / 2, (ih - bh) / 2
+        yield im.resize((W, H), Image.LANCZOS, box=(x0, y0, x0 + bw, y0 + bh))
+
+
 def build_end_assets(key):
     im = load_photo(key)
     # fond : photo plein cadre, floutée, assombrie, teintée vert
@@ -373,7 +388,7 @@ def main():
     idx = index()
     with ThreadPoolExecutor(4) as ex:
         futs = {(src, b0): ex.submit(extract, idx[src], t_in, n)
-                for src, t_in, b0, n in shots if not src.startswith("photo:")}
+                for src, t_in, b0, n in shots if ":" not in src}
         jobs = {k: f.result() for k, f in futs.items()}
     print(f"{len(jobs)} plans prêts", flush=True)
 
@@ -394,6 +409,8 @@ def main():
             gen = end_card(src.split(":")[1], n, fr(grid.boom) - b0)
         elif src.startswith("photo:"):
             gen = photo_pan(src.split(":")[1], n)
+        elif src.startswith("still:"):
+            gen = photo_still(src.split(":")[1], n)
         else:
             gen = (push_in(im, i, n) for i, im in enumerate(read_frames(jobs[(src, b0)], n)))
         for im in gen:
