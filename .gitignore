@@ -1,1 +1,3 @@
 node_modules/
+esaa/.cache/
+__pycache__/
