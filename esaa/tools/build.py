@@ -68,11 +68,20 @@ TIMELINE = [
     ("6954", 1.30, 1),
     ("6952", 0.60, 1),
     ("6948", 0.20, 1),
-    # Mesure 8 : photo de groupe (panoramique) pendant que la musique retombe
-    ("photo:6920", 0, 3),
-    # Carte de fin : la photo se pose, puis le BOUM fait entrer le slogan
-    ("photo:6929", 0, None),
+    # Mesure 8 : zooms sur trois parties de la photo de groupe, un par accent
+    ("part:6921:L", 0, 1),
+    ("part:6921:C", 0, 1),
+    ("part:6921:R", 0, 1),
+    # Carte de fin : la photo entière se pose, puis le BOUM fait entrer le slogan
+    ("photo:6921", 0, None),
 ]
+
+# Parties de la photo 6921 (2576x1932) : centre x, centre y, largeur, en pixels de la photo
+PARTS = {
+    "L": (520, 1180, 880),    # marinière, lunettes, celui qui pointe derrière
+    "C": (1300, 1180, 880),   # les quatre filles du milieu
+    "R": (2140, 1180, 820),   # t-shirt beige, casquette, t-shirt noir
+}
 
 HLG = ("zscale=tin=arib-std-b67:min=bt2020nc:pin=bt2020:rin=tv:t=linear:npl=203,"
        "format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=mobius:desat=0,"
@@ -266,6 +275,22 @@ def photo_still(key, n, amount=0.045):
         yield im.resize((W, H), Image.LANCZOS, box=(x0, y0, x0 + bw, y0 + bh))
 
 
+def photo_part(key, part, n, amount=0.06):
+    """Zoom sur une partie de la photo (cadre 9:16), léger zoom avant pendant le plan."""
+    im = load_photo(key)
+    iw, ih = im.size
+    cx, cy, cw = PARTS[part]
+    ch = cw * H / W
+    if ch > ih:
+        ch, cw = ih, ih * W / H
+    for i in range(n):
+        s = 1.0 + amount * ease_out(i / max(n - 1, 1))
+        bw, bh = cw / s, ch / s
+        x0 = min(max(cx - bw / 2, 0), iw - bw)
+        y0 = min(max(cy - bh / 2, 0), ih - bh)
+        yield im.resize((W, H), Image.LANCZOS, box=(x0, y0, x0 + bw, y0 + bh))
+
+
 def build_end_assets(key):
     im = load_photo(key)
     # fond : photo plein cadre, floutée, assombrie, teintée vert
@@ -411,6 +436,9 @@ def main():
             gen = photo_pan(src.split(":")[1], n)
         elif src.startswith("still:"):
             gen = photo_still(src.split(":")[1], n)
+        elif src.startswith("part:"):
+            _, key, part = src.split(":")
+            gen = photo_part(key, part, n)
         else:
             gen = (push_in(im, i, n) for i, im in enumerate(read_frames(jobs[(src, b0)], n)))
         for im in gen:

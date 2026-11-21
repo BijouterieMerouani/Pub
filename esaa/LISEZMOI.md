@@ -13,8 +13,8 @@ Projet associatif de l'ESAA : l'économie et la finance expliquées aux enfants.
 | 6,6 – 11,7 s | L'économie en jeu : billets, stand « 2 pour 1 jeton ». |
 | 11,7 – 17,7 s | Ateliers. |
 | 17,7 – 24,3 s | Remise des diplômes. |
-| 24,3 – 26,9 s | Panoramique sur la photo de groupe. |
-| 26,9 – 30 s | Carte de fin ; au BOUM (27,6 s, notre propre impact : le son de fin de la vidéo TikTok était le jingle du logo) : « L’économie et la finance expliquées aux enfants ». |
+| 24,3 – 26,9 s | Zooms sur trois parties de la photo de groupe 6921 (gauche, centre, droite), un par accent. |
+| 26,9 – 30 s | Carte de fin avec la photo 6921 entière ; au BOUM (27,6 s, notre propre impact : le son de fin de la vidéo TikTok était le jingle du logo) : « L’économie et la finance expliquées aux enfants ». |
 
 Toutes les coupes tombent sur les accents de la musique (94,9 BPM, motif 3+3+2).
 La musique (24 s) est allongée à 30 s en rejouant deux mesures (même accord) ; le BOUM final
@@ -49,7 +49,7 @@ qui commencent à 6,9 / 17,2 / 27,5 / 37,8 / 48,1 s (basse plus forte au début 
 | 17,2 – 27,5 s | Les stands et l'économie : billets, stand « 2 pour 1 jeton ». |
 | 27,5 – 37,8 s | Ateliers (photo du pouce levé en 9:16). |
 | 37,8 – 48,1 s | Présentations et remise des diplômes. |
-| 48,1 – 55,9 s | Photos de groupe en rafale, la dernière jusqu'au noir. |
+| 48,1 – 55,9 s | Photos de groupe en rafale, zooms sur trois parties de la photo 6921 (la plus nette), puis la photo entière qui se dévoile (dézoom), jusqu'au noir. |
 | 55,9 – 57,2 s | Noir, **ESAA · Projet associatif**. |
 
 Look : LUT `tools/look.py` (contraste en S, ombres bleu-vert, tons moyens chauds, blancs crème,

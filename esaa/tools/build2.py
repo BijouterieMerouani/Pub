@@ -46,9 +46,10 @@ def beat(k):
 # Chaque plan : source, point d'entrée (s), durée en temps (ou fin absolue pour l'intro),
 # cadrage 16:9 `cy` (centre vertical de la bande gardée, 0 = haut, 1 = bas) ;
 # `speed` < 1 = ralenti (les vidéos 4K à 60 i/s) ; `alt16` = autre plan pour le 16:9.
-def S(src, t_in, beats=None, cy=0.45, speed=1.0, until=None, alt16=None, cx=0.5, pan=None, dark=False):
+def S(src, t_in, beats=None, cy=0.45, speed=1.0, until=None, alt16=None, cx=0.5, pan=None, dark=False,
+      box9=None, box16=None, focus=None):
     return dict(src=src, t_in=t_in, beats=beats, cy=cy, speed=speed, until=until, alt16=alt16,
-                cx=cx, pan=pan, dark=dark)
+                cx=cx, pan=pan, dark=dark, box9=box9, box16=box16, focus=focus)
 
 
 INTRO = [  # titre par-dessus, image assombrie (le jaune ressort), le groove « ouvre » l'image
@@ -81,11 +82,14 @@ ACTS = [
      S("6944", 4.00, 1, cy=0.50), S("6952", 0.60, 1, cy=0.45), S("6953", 1.20, 1, cy=0.42),
      S("6954", 1.30, 2, cy=0.55), S("6945", 10.80, 1, cy=0.50), S("6950", 3.00, 1, cy=0.42),
      S("6943", 6.30, 1, cy=0.42)],
-    # 5. Photos de groupe en rafale, la dernière (tout le monde salue) jusqu'au noir
-    [S("photo:6920", 0, 2, cy=0.55, cx=0.30), S("photo:6922", 0, 1, cy=0.55, cx=0.70),
-     S("photo:6923", 0, 1, cy=0.55, cx=0.45), S("photo:6925", 0, 1, cy=0.55, cx=0.25),
-     S("photo:6926", 0, 1, cy=0.55, cx=0.75), S("photo:6928", 0, 2, cy=0.55, cx=0.50),
-     S("photo:6929", 0, 4, cy=0.55, pan=(0.15, 0.85))],
+    # 5. Photos de groupe en rafale, puis zooms sur trois parties de la photo 6921 (la plus
+    #    nette), et pour finir la photo entière qui se dévoile, jusqu'au noir
+    [S("photo:6925", 0, 2, cy=0.55, cx=0.30), S("photo:6922", 0, 1, cy=0.55, cx=0.70),
+     S("photo:6923", 0, 1, cy=0.55, cx=0.45), S("photo:6926", 0, 1, cy=0.55, cx=0.75),
+     S("part:6921", 0, 1, box9=(520, 1180, 880), box16=(560, 880, 1000)),
+     S("part:6921", 0, 1, box9=(1300, 1180, 880), box16=(1300, 920, 1000)),
+     S("part:6921", 0, 1, box9=(2140, 1180, 820), box16=(2060, 870, 1000)),
+     S("final:6921", 0, 4, cy=0.452, focus=1300)],
 ]
 ACT_BEATS = [18, 16, 16, 16, 12]     # 1re phrase : 2 temps d'avance (le DROP)
 
@@ -209,10 +213,73 @@ def graded_photo(key):
     return _graded[key]
 
 
+def part_frames(sh, n, fmt):
+    """Zoom sur une partie de la photo : boîte (centre x, centre y, largeur) en pixels."""
+    W, H = FORMATS[fmt]
+    im = graded_photo(sh["src"].split(":")[1])
+    iw, ih = im.size
+    cx, cy, cw = sh["box16"] if fmt == "16x9" else sh["box9"]
+    ch = cw * H / W
+    if ch > ih:
+        ch, cw = ih, ih * W / H
+    for i in range(n):
+        s = 1.0 + 0.06 * ease(i / max(n - 1, 1))
+        bw, bh = cw / s, ch / s
+        x0 = min(max(cx - bw / 2, 0), iw - bw)
+        y0 = min(max(cy - bh / 2, 0), ih - bh)
+        yield im.resize((W, H), Image.LANCZOS, box=(x0, y0, x0 + bw, y0 + bh))
+
+
+def final_frames(sh, n, fmt):
+    """Dernier plan : la photo entière. 16:9 : on dézoome (1,15 -> 1) sur la bande cy.
+    9:16 : on part d'un plan serré (focus) et la photo rétrécit jusqu'à tenir en largeur,
+    sur un fond flou de la même photo."""
+    from PIL import ImageEnhance
+    W, H = FORMATS[fmt]
+    im = graded_photo(sh["src"].split(":")[1])
+    iw, ih = im.size
+    if fmt == "16x9":
+        cw, ch = iw, iw * H / W
+        yc = min(max(sh["cy"] * ih, ch / 2), ih - ch / 2)
+        for i in range(n):
+            s = max(1.0, 1.15 - 0.15 * ease(min(1.0, i / (0.85 * n))))
+            bw, bh = min(iw, cw / s), min(ih, ch / s)
+            x0 = max(0.0, (iw - bw) / 2)
+            y0 = min(max(yc - bh / 2, 0), ih - bh)
+            yield im.resize((W, H), Image.LANCZOS, box=(x0, y0, x0 + bw, y0 + bh))
+        return
+    bw = ih * W / H
+    bg = im.resize((W // 6, H // 6), Image.BICUBIC, box=((iw - bw) / 2, 0, (iw + bw) / 2, ih))
+    bg = bg.filter(ImageFilter.GaussianBlur(5)).resize((W, H), Image.BICUBIC)
+    bg = ImageEnhance.Brightness(bg).enhance(0.5)
+    s0, s1 = H / ih, W / iw * 0.94
+    f0, f1 = np.array([sh["focus"], ih / 2]), np.array([iw / 2, ih / 2])
+    for i in range(n):
+        u = ease(min(1.0, i / (0.62 * n)))
+        s = float(np.exp(np.log(s0) + (np.log(s1) - np.log(s0)) * u)) * (1 + 0.02 * i / n)
+        f = f0 + (f1 - f0) * u
+        fw, fh = iw * s, ih * s
+        x, y = W / 2 - f[0] * s, H / 2 - f[1] * s
+        # on ne redimensionne que la partie visible de la photo
+        vx0, vy0 = max(0.0, -x / s), max(0.0, -y / s)
+        vx1, vy1 = min(iw, (W - x) / s), min(ih, (H - y) / s)
+        px, py = max(0, round(x)), max(0, round(y))
+        tw, th = round((vx1 - vx0) * s), round((vy1 - vy0) * s)
+        frame = bg.copy()
+        frame.paste(im.resize((tw, th), Image.LANCZOS, box=(vx0, vy0, vx1, vy1)), (px, py))
+        yield frame
+
+
 def photo_frames(sh, n, fmt):
     """16:9 : bande horizontale (cy) avec léger zoom ; 9:16 : fenêtre verticale à cx
     (ou panoramique `pan`) avec léger zoom. Photo verticale (`still:`) : plein cadre."""
     W, H = FORMATS[fmt]
+    if sh["src"].startswith("part:"):
+        yield from part_frames(sh, n, fmt)
+        return
+    if sh["src"].startswith("final:"):
+        yield from final_frames(sh, n, fmt)
+        return
     key = sh["src"].split(":")[1]
     im = graded_photo(key)
     iw, ih = im.size
@@ -418,7 +485,7 @@ def render(fmt, preview=False):
         "-movflags", "+faststart", silent], stdin=subprocess.PIPE)
     f = 0
     for i, (sh, fa, n) in enumerate(shots):
-        if sh["src"].startswith(("photo:", "still:")):
+        if ":" in sh["src"]:
             gen = photo_frames(sh, n, fmt)
         else:
             amount = 0.03 if sh["speed"] == 1.0 else 0.02
